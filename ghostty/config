@@ -1,0 +1,13 @@
+auto-update = off
+
+window-theme = ghostty
+
+clipboard-read = allow
+clipboard-write = allow
+
+cursor-style = block
+cursor-style-blink = false
+shell-integration = zsh
+
+font-size = 16
+

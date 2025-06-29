@@ -1,0 +1,5 @@
+-- vim.filetype.add({
+--   extensions = {
+--     bql  = "sql"
+--   }
+-- })
