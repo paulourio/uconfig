@@ -12,4 +12,15 @@ return {
     gofumpt = true,
     semanticTokens = true,
   },
+  capabilities = {
+    textDocument = {
+      semanticTokens = {
+        dynamicRegistration = false,
+        requests = {
+          range = false,
+          full = { delta = true },
+        },
+      },
+    },
+  },
 }

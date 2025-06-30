@@ -37,22 +37,20 @@ return {
         },
       },
 
-      -- Completion plugin.
-      "hrsh7th/cmp-nvim-lsp", -- Source for nvim's built-in LSP.
-      "hrsh7th/cmp-buffer",   -- Source for buffer words.
-      "hrsh7th/cmp-path",     -- Source for vim's cmdline.
-      "hrsh7th/cmp-cmdline",
+      -- Completion engine.
       "hrsh7th/nvim-cmp",
 
       -- Snippets.
       "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip"
+      "saadparwaiz1/cmp_luasnip",
     },
     config = function()
       -- Function call to configure the current buffer when LSP attaches to it.
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("lsp-attach", { clear = true }),
         callback = function(event)
+          local client = assert(vim.lsp.get_client_by_id(event.data.client_id))
+
           local map = function(keys, func, desc, mode)
             mode = mode or "n"
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
@@ -87,8 +85,7 @@ return {
           -- Highlight references of the word under the cursor when cursor
           -- rests for a little while.
           --   More information on `:help CursorHold`.
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+          if client:supports_method("textDocument/documentHighlight", event.buf) then
             local hi_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = false })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
               buffer = event.buf,
@@ -113,7 +110,7 @@ return {
           end
 
           -- Keymap to toggle inlay hints in the code.
-          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
+          if client:supports_method("textDocument/inlayHint", event.buf) then
             map("<leader>th", function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, "[T]oggle Inlay [H]ints")
@@ -150,65 +147,6 @@ return {
         },
       })
 
-      -- Show diagnostics for current row.
-      local cmp = require("cmp")
-      local cmp_select = { behavior = cmp.SelectBehavior.Select }
-      local luasnip = require("luasnip")
-
-      cmp.setup({
-        sources = {
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "buffer" },
-          { name = "path" },
-        },
-        mapping = cmp.mapping.preset.insert {
-          ["<C-p>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.mapping.select_prev_item(cmp_select)
-            elseif luasnip.locally_jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
-          end),
-          ["<C-n>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item(cmp_select)
-            elseif luasnip.locally_jumpable(1) then
-              luasnip.jump(1)
-            else
-              fallback()
-            end
-          end),
-          ["<C-y>"] = cmp.mapping.confirm({ select = true }),
-          ["<C-Space>"] = cmp.mapping.complete(),
-        },
-      })
-
-      -- `/` cmdline setup.
-      cmp.setup.cmdline("/", {
-        mapping = cmp.mapping.preset.cmdline(),
-        sources = {
-          { name = "buffer" },
-        }
-      })
-
-      -- `:` cmdline setup.
-      cmp.setup.cmdline(":", {
-        mapping = cmp.mapping.preset.cmdline(),
-        sources = cmp.config.sources({
-          { name = "path" }
-        }, {
-          {
-            name = "cmdline",
-            option = {
-              ignore_cmds = { "Man", "!" }
-            }
-          }
-        })
-      })
-
       require("fidget").setup({})
       require("mason").setup()
       require("mason-lspconfig").setup({
@@ -228,9 +166,23 @@ return {
         }
       })
 
+      lspconfig.pyright.setup({
+        capabilities = capabilities,
+        settings = {
+          python = {
+            analysis = {
+              typeCheckingMode = "standard",
+              autoSearchPaths = true,
+              useLibraryCodeForTypes = true,
+              diagnosticMode = "workspace",
+            },
+          },
+        },
+      })
+
       -- vim.lsp.enable("ty")
-      vim.lsp.enable("pyright")
-      vim.lsp.enable("gopls")
+      -- vim.lsp.enable("pyright")
+      -- vim.lsp.enable("gopls")
     end,
   },
 }
