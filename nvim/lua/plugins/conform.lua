@@ -22,41 +22,47 @@ return {
         lsp_format = (disable[vim.bo[buf].filetype] and "never") or "fallback",
       }
     end,
-  },
-  formatters_by_ft = {
-    c = { "clang_format" },
-    cpp = { "clang_format" },
-    go = { "gofumpt", "goimports" },
-    hcl = { "hcl" },
-    javascript = { "prettier" },
-    lua = { "stylua" },
-    python = { "ruff_organize_imports" },
-    sh = { "shfmt" },
-    terraform = { "terraform_fmt" },
-    xml = { "xmlformatter" },
-    yaml = { "yamlfix" },
-  },
-  formatters = {
-    clang_format = {
-      command = "clang-format",
+    formatters_by_ft = {
+      c = { "clang_format" },
+      cpp = { "clang_format" },
+      go = { "gofumpt", "goimports" },
+      hcl = { "hcl" },
+      javascript = { "prettier" },
+      lua = { "stylua" },
+      python = { "ruff_organize_imports" },
+      sh = { "shfmt" },
+      sql_bigquery = { "bigquery_fmt" },
+      terraform = { "terraform_fmt" },
+      xml = { "xmlformatter" },
+      yaml = { "yamlfix" },
     },
-    ruff_organize_imports = {
-      command = "ruff",
-      args = {
-        "check",
-        "--force-exclude",
-        "--select=I001",
-        "--fix",
-        "--exit-zero",
-        "--stdin-filename",
-        "$FILENAME",
-        "-",
+    formatters = {
+      bigquery_fmt = {
+        command = "bqfmt",
+        args = { "-w", "$FILENAME" },
+        stdin = true,
       },
-      stdin = true,
-    },
-    terraform_fmt = {
-      command = "terraform",
-      args = { "fmt" },
+      clang_format = {
+        command = "clang-format",
+      },
+      ruff_organize_imports = {
+        command = "ruff",
+        args = {
+          "check",
+          "--force-exclude",
+          "--select=I001",
+          "--fix",
+          "--exit-zero",
+          "--stdin-filename",
+          "$FILENAME",
+          "-",
+        },
+        stdin = true,
+      },
+      terraform_fmt = {
+        command = "terraform",
+        args = { "fmt" },
+      },
     },
   },
 }
