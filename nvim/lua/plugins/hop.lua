@@ -1,6 +1,6 @@
 return {
-  "hadronized/hop.nvim",
-  branch = "v2",
+  "smoka7/hop.nvim",
+  version = "*",
   config = function()
     require("hop").setup({
       keys = "etovxqpdygfblzhckisuran",
